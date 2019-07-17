@@ -1,0 +1,218 @@
+<?php namespace ProcessWire;
+
+/**
+ * Markup Content Security Policy
+ *
+ * #pw-summary Configure and implement a Content Security Policy for all front-end HTML pages.
+ * #pw-var $csp
+ *
+ * @property string $directiveDefaultSrc
+ * @property string $directiveScriptSrc
+ * @property string $directiveStyleSrc
+ * @property string $directiveImgSrc
+ * @property string $directiveConnectSrc
+ * @property string $directiveFontSrc
+ * @property string $directiveObjectSrc
+ * @property string $directiveMediaSrc
+ * @property string $directiveManifestSrc
+ * @property string $directiveFrameSrc
+ * @property string $directiveFormAction
+ * @property string $directiveBaseUri
+ * @property string $directivesOther
+ * @property bool $report
+ * @property string $reportEndpoint
+ * @property bool $debug
+ *
+ * @copyright 2019 NB Communication Ltd
+ * @license Mozilla Public License v2.0 http://mozilla.org/MPL/2.0/
+ *
+ */
+
+class MarkupContentSecurityPolicy extends WireData implements Module {
+
+	/**
+	 * getModuleInfo is a module required by all modules to tell ProcessWire about them
+	 *
+	 * @return array
+	 *
+	 */
+	public static function getModuleInfo() {
+
+		return [
+			"title" => "Markup Content Security Policy",
+			"version" => 001,
+			"summary" => "Configure and implement a Content Security Policy for all front-end HTML pages.",
+			"author" => "chriswthomson",
+			"href" => "https://github.com/chriswthomson/MarkupContentSecurityPolicy",
+			"singular" => true,
+			"autoload" => "template!=admin",
+			"icon" => "lock",
+			"requires" => "ProcessWire>=3.0.123",
+		];
+	}
+
+	/**
+	 * Default Directives
+	 *
+	 */
+	const directives = [
+		"default-src",
+		"script-src",
+		"style-src",
+		"img-src",
+		"connect-src",
+		"font-src",
+		"object-src",
+		"media-src",
+		"manifest-src",
+		"frame-src",
+		"form-action",
+		"base-uri",
+	];
+
+	/**
+	 * Report Name
+	 *
+	 */
+	const reportName = "csp-violations";
+
+	/**
+	 * The CSP Directives array
+	 *
+	 * @var array
+	 *
+	 */
+	protected $directives = [];
+
+	/**
+	 * Initialize the module
+	 *
+	 */
+	public function init() {
+
+		// Construct the array of directives
+		foreach(self::directives as $name) {
+			$key = $this->getDirectiveKey($name);
+			$value = $this->get($key);
+			if($value) $this->directives[] = "$name $value";
+		}
+
+		// Append any custom directives
+		if($this->directivesOther) {
+			$this->directives = array_merge($this->directives, explode("\n", $this->directivesOther));
+		}
+	}
+
+	/**
+	 * When ProcessWire is ready
+	 *
+	 */
+	public function ready() {
+
+		// Do not load in the admin
+		// Required as the module config loads the module
+		if($this->wire("page")->template == "admin") return;
+
+		// CSP violation reporting
+		if($this->wire("input")->get->bool(self::reportName)) {
+
+			$report = file_get_contents("php://input");
+			if(!empty($report)) {
+
+				$report = json_decode($report, 1);
+
+				// If a valid report has been received
+				if(isset($report) && is_array($report) && isset($report["documentURI"])) {
+
+					// JSON encode and remove newlines from report
+					// Remove newlines to preserve accurate log line count
+					// Use WireEncodeJSON as there is no need for empty values
+					$report = str_replace("\n", "", WireEncodeJSON($report));
+
+					// Log the report
+					$this->wire("log")->save(self::reportName, $report, ["url" => $this->wire("page")->url]);
+
+					// Post the report to an endpoint if specified
+					if($this->reportEndpoint) {
+
+						$http = $this->wire(new WireHttp());
+
+						if($http->validateURL($this->reportEndpoint)) {
+							$response = $http->post($this->reportEndpoint, $report);
+							if($response === false) {
+								$this->logDebug($http->getError(), sprintf(
+									$this->_("Posting report to %s failed"),
+									$this->reportEndpoint
+								));
+							} else {
+								$this->logDebug($response, sprintf($this->_("Endpoint Response %d"), $http->getHttpCode()));
+							}
+						} else {
+							$this->logDebug($this->reportEndpoint, $this->_("Endpoint failed URL validation"));
+						}
+					}
+
+					// Return 204 No Content
+					http_response_code(204);
+					die();
+				}
+			}
+		}
+
+		// Add the meta tag to HTML pages
+		$this->wire->addHookAfter("Page::render", function(HookEvent $event) {
+
+			$page = $event->object;
+			$contentType = $page->template->contentType;
+
+			// If not an html page, return
+			if(
+				strpos($event->return, "<head>") === false ||
+				($contentType && $contentType !== "html") ||
+				$this->wire("config")->ajax
+			) {
+				$this->logDebug(sprintf($this->_("%s is not an HTML page"), $page->url));
+				return;
+			}
+
+			// Log directives in debug mode
+			// These only need logged on pages using the policy
+			if(count($this->directives)) {
+				$this->logDebug($this->directives, $this->_("Directives"));
+			}
+
+			// Place <meta> inside the <head>
+			$event->return = str_replace(
+				"<head>",
+				"<head>\n" .
+					"\t" . '<meta http-equiv="Content-Security-Policy" content="' . implode("; ", $this->directives) . '">' .
+					($this->report ? "\n\t" . '<script src="' . $this->wire("config")->urls($this) . 'report-uri.js"></script>' . "\n" : ""),
+				$event->return
+			);
+		});
+	}
+
+	/**
+	 * Return the directive's module key from its name
+	 *
+	 * #pw-internal
+	 *
+	 * @param string $name
+	 * @return string
+	 *
+	 */
+	public function getDirectiveKey($name) {
+		return $this->wire("sanitizer")->camelCase("directive-$name");
+	}
+
+	/**
+	 * Log a debug message
+	 *
+	 * @param mixed $log
+	 * @return bool
+	 *
+	 */
+	protected function logDebug($log, $title = "") {
+		return $this->debug ? $this->log(($title ? "$title: " : "") . (is_array($log) ? print_r($log, 1) : $log)) : false;
+	}
+}
