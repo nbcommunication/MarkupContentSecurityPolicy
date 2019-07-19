@@ -33,10 +33,10 @@ document.addEventListener("securitypolicyviolation", function(event) {
 		report[params[i]] = event[params[i]];
 	}
 
+	// Only log unique reports
 	report = JSON.stringify(report);
 	var id = btoa(report);
 	if(!(id in cspViolations)) {
-		// Only log unique reports
 		cspViolations[id] = report;
 		request.open("POST", "?csp-violations=1", true),
 		request.setRequestHeader("content-type", "application/csp-report"),
