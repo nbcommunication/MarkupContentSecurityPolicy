@@ -9,6 +9,7 @@
  * 
  */
 
+var cspViolations = {};
 document.addEventListener("securitypolicyviolation", function(event) {
 
 	var report = {},
@@ -28,9 +29,17 @@ document.addEventListener("securitypolicyviolation", function(event) {
 		],
 		request = new XMLHttpRequest;
 
-	for(var i = 0; i < params.length; i++) report[params[i]] = event[params[i]];
+	for(var i = 0; i < params.length; i++) {
+		report[params[i]] = event[params[i]];
+	}
 
-	request.open("POST", "?csp-violations=1", true),
-	request.setRequestHeader("content-type", "application/csp-report"),
-	request.send(JSON.stringify(report));
+	report = JSON.stringify(report);
+	var id = btoa(report);
+	if(!(id in cspViolations)) {
+		// Only log unique reports
+		cspViolations[id] = report;
+		request.open("POST", "?csp-violations=1", true),
+		request.setRequestHeader("content-type", "application/csp-report"),
+		request.send(report);
+	}
 });
