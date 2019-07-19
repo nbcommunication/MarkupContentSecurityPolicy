@@ -236,9 +236,8 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 			}
 		}
 
+		// The Content Security Policy should only be used if deployed or the page is loaded by the superuser account
 		if($this->deploy || $this->wire("user")->isSuperUser()) {
-
-			// The Content Security Policy should only be enabled if deployed or the page is loaded by the superuser
 
 			// Add the meta tag to HTML pages
 			$this->wire->addHookAfter("Page::render", function(HookEvent $event) {
