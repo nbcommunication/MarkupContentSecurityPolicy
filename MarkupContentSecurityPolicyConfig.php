@@ -3,8 +3,6 @@
 /**
  * Markup Content Security Policy Configuration
  *
- * @todo Is there a better way to get the module that this configures?
- *
  */
 
 class MarkupContentSecurityPolicyConfig extends ModuleConfig {
@@ -16,7 +14,7 @@ class MarkupContentSecurityPolicyConfig extends ModuleConfig {
 	 *
 	 */
 	public function getDefaults() {
-		return [];
+		return ["deploy" => 0];
 	}
 
 	/**
@@ -33,6 +31,17 @@ class MarkupContentSecurityPolicyConfig extends ModuleConfig {
 		$csp = $modules->get(str_replace("Config", "", $this->className));
 		$textCsp = $this->_("Content Security Policy");
 		$urlInfo = "https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy";
+
+		// Deploy
+		$inputfields->add([
+			"type" => "radios",
+			"name" => "deploy",
+			"label" => $this->_("Deploy Policy?"),
+			"options" => [1 => "Yes", 0 => "No"],
+			"notes" => sprintf($this->_("When not deployed, the %s will only be enabled for the superuser account."), $textCsp),
+			"icon" => "toggle-on",
+			"optionColumns" => 1,
+		]);
 
 		// Directives
 		$fieldset = $modules->get("InputfieldFieldset");
@@ -93,6 +102,17 @@ class MarkupContentSecurityPolicyConfig extends ModuleConfig {
 		]);
 
 		$fieldset->add([
+			"type" => "text",
+			"name" => "reportExclude",
+			"label" => $this->_("Exclude Parameters"),
+			"description" => $this->_("If you wish to exclude any parameters from the report, please specify them here."),
+			"placeholder" => "e.g. originalPolicy,disposition",
+			"notes" => $this->_("Please enter a comma delimited list."),
+			"showIf" => "report=1",
+			"collapsed" => 2,
+		]);
+
+		$fieldset->add([
 			"type" => "URL",
 			"name" => "reportEndpoint",
 			"label" => $this->_("Endpoint"),
@@ -101,6 +121,26 @@ class MarkupContentSecurityPolicyConfig extends ModuleConfig {
 			"showIf" => "report=1",
 			"collapsed" => 2,
 		]);
+
+		// Filter False Positives
+		$fieldsetFilters = $modules->get("InputfieldFieldset");
+		$fieldsetFilters->label = $this->_("Filter False Positives");
+		$fieldsetFilters->description = $this->_("If you want to use any of the filters below please select them.");
+		$fieldsetFilters->notes = $this->_("Any reports that match the param and an enabled value will not be logged.");
+		$fieldsetFilters->showIf = "report=1";
+		$fieldsetFilters->collapsed = 2;
+
+		foreach($csp->reportFilters as $param => $filters) {
+			$fieldsetFilters->add([
+				"type" => "checkboxes",
+				"name" => "reportFilters" . ucfirst($param),
+				"label" => $param,
+				"options" => $filters,
+				"optionColumns" => 3,
+			]);
+		}
+
+		$fieldset->add($fieldsetFilters);
 
 		$inputfields->add($fieldset);
 
