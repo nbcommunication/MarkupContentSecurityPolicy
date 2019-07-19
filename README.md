@@ -40,7 +40,6 @@ Please refer to these links for more information on how to configure your policy
 - https://scotthelme.co.uk/content-security-policy-an-introduction/
 - https://developers.google.com/web/fundamentals/security/csp/
 
-
 ### Violation Reporting
 Because the `report-uri` directive is not available, when Violation Reporting is enabled a script is added to the `<head>`. This script listens for a [`SecurityPolicyViolationEvent`](https://developer.mozilla.org/en-US/docs/Web/API/SecurityPolicyViolationEvent) and posts the generated report. The module then processes and logs the violation report to **csp-violations**.
 
