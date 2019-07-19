@@ -116,6 +116,8 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	 */
 	public function init() {
 
+		$isAdmin = $this->wire("page")->template == "admin";
+
 		// Construct the array of directives
 		foreach(self::directives as $name) {
 			$key = $this->getDirectiveKey($name);
@@ -128,6 +130,9 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 			$this->directives = array_merge($this->directives, explode("\n", $this->directivesOther));
 		}
 
+		// Log directives in debug mode when accessing config
+		if($isAdmin) $this->logDebug($this->directives, $this->_("Directives"));
+
 		// Customise filters
 		foreach($this->reportFilters as $param => $filters) {
 			$this->enabledFilters[$param] = [];
@@ -139,11 +144,13 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 				$this->reportFilters[$param][$key] = $value;
 			}
 
-			if(count($this->enabledFilters[$param]) && $this->wire("page")->template == "admin") {
+			if(count($this->enabledFilters[$param]) && $isAdmin) {
 				// Log enabled filters in debug mode when accessing config
 				$this->logDebug($this->enabledFilters[$param], sprintf($this->_("Enabled filters for %s"), "`" . $param . "`"));
 			}
 		}
+
+		
 	}
 
 	/**
@@ -151,14 +158,6 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	 *
 	 */
 	public function ready() {
-
-		// Do not load in the admin
-		// Required as the module config loads the module
-		if($this->wire("page")->template == "admin") {
-			// Log directives in debug mode when accessing config
-			if(count($this->directives)) $this->logDebug($this->directives, $this->_("Directives"));
-			return;
-		}
 
 		// CSP violation reporting
 		if($this->wire("input")->get->bool(self::reportName)) {
