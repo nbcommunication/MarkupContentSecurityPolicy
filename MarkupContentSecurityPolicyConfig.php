@@ -14,7 +14,9 @@ class MarkupContentSecurityPolicyConfig extends ModuleConfig {
 	 *
 	 */
 	public function getDefaults() {
-		return ["deploy" => 0];
+		return [
+			"deploy" => 0,
+		];
 	}
 
 	/**
@@ -126,7 +128,7 @@ class MarkupContentSecurityPolicyConfig extends ModuleConfig {
 		$fieldsetFilters = $modules->get("InputfieldFieldset");
 		$fieldsetFilters->label = $this->_("Filter False Positives");
 		$fieldsetFilters->description = $this->_("If you want to use any of the filters below please select them.");
-		$fieldsetFilters->notes = $this->_("Any reports that match the param and an enabled value will not be logged.");
+		$fieldsetFilters->notes = $this->_("Any reports that match the parameter and an enabled value filter will not be logged.");
 		$fieldsetFilters->showIf = "report=1";
 		$fieldsetFilters->collapsed = 2;
 
