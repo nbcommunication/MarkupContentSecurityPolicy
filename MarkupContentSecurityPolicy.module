@@ -4,7 +4,6 @@
  * Markup Content Security Policy
  *
  * #pw-summary Configure and implement a Content Security Policy for all front-end HTML pages.
- * #pw-var $csp
  *
  * @copyright 2019 NB Communication Ltd
  * @license Mozilla Public License v2.0 http://mozilla.org/MPL/2.0/
@@ -43,7 +42,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 
 		return [
 			"title" => "Markup Content Security Policy",
-			"version" => 002,
+			"version" => 003,
 			"summary" => "Configure and implement a Content Security Policy for all front-end HTML pages.",
 			"author" => "chriswthomson",
 			"href" => "https://github.com/chriswthomson/MarkupContentSecurityPolicy",
@@ -149,8 +148,6 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 				$this->logDebug($this->enabledFilters[$param], sprintf($this->_("Enabled filters for %s"), "`" . $param . "`"));
 			}
 		}
-
-		
 	}
 
 	/**
@@ -245,8 +242,12 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 				$config = $this->wire("config");
 				$contentType = $page->template->contentType;
 
-				// If not an html page, return
-				if(($contentType && $contentType !== "html") || stripos($event->return, "</html>") === false || $config->ajax) {
+				// If not an html page with a <head> element, return
+				if(
+					($contentType && $contentType !== "html") ||
+					stripos($event->return, "</html>") === false ||
+					stripos($event->return, "<head>") === false
+				) {
 					$this->logDebug(sprintf($this->_("%s is not an HTML page"), $page->url));
 					return;
 				}
@@ -280,6 +281,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	 * Log a debug message
 	 *
 	 * @param mixed $log
+	 * @param string $title
 	 * @return bool
 	 *
 	 */
