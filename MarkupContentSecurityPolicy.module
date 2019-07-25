@@ -286,6 +286,6 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	 *
 	 */
 	protected function logDebug($log, $title = "") {
-		return $this->debug ? $this->log(($title ? "$title: " : "") . (is_array($log) ? print_r($log, 1) : $log)) : false;
+		return $this->debug ? $this->log(($title ? "$title: " : "") . (is_array($log) ? json_encode($log, 1) : $log)) : false;
 	}
 }
