@@ -40,7 +40,7 @@ class MarkupContentSecurityPolicyConfig extends ModuleConfig {
 			"name" => "deploy",
 			"label" => $this->_("Deploy Policy?"),
 			"options" => [1 => "Yes", 0 => "No"],
-			"notes" => sprintf($this->_("When not deployed, the %s will only be enabled for the superuser account."), $textCsp),
+			"notes" => sprintf($this->_("When not deployed, or debug mode is enabled, the %s will only be implemented for the superuser account."), $textCsp),
 			"icon" => "toggle-on",
 			"optionColumns" => 1,
 		]);

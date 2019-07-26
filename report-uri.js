@@ -39,7 +39,7 @@ document.addEventListener("securitypolicyviolation", function(event) {
 	if(!(id in cspViolations)) {
 		cspViolations[id] = report;
 		request.open("POST", "?csp-violations=1", true),
-		request.setRequestHeader("content-type", "application/csp-report"),
+		request.setRequestHeader("Content-Type", "application/csp-report"),
 		request.send(report);
 	}
 });

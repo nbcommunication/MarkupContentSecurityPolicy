@@ -42,7 +42,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 
 		return [
 			"title" => "Markup Content Security Policy",
-			"version" => 003,
+			"version" => 004,
 			"summary" => "Configure and implement a Content Security Policy for all front-end HTML pages.",
 			"author" => "chriswthomson",
 			"href" => "https://github.com/chriswthomson/MarkupContentSecurityPolicy",
@@ -233,7 +233,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 		}
 
 		// The Content Security Policy should only be used if deployed or the page is loaded by the superuser account
-		if($this->deploy || $this->wire("user")->isSuperUser()) {
+		if(($this->deploy && !$this->debug) || $this->wire("user")->isSuperUser()) {
 
 			// Add the meta tag to HTML pages
 			$this->wire->addHookAfter("Page::render", function(HookEvent $event) {
