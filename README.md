@@ -25,7 +25,7 @@ There are some limitations to using the `<meta>` element:
 To configure this module, go to Modules > Configure > MarkupContentSecurityPolicy.
 
 ### Deploy Policy?
-When enabled, the Content Security Policy `<meta>` tag will be added to all HTML pages for all users. When disabled, it will only be added for the superuser account, allowing you to test the policy.
+When enabled, the Content Security Policy `<meta>` tag will be added to all HTML pages for all users. When disabled or debug mode is enabled, it will only be added for the superuser account, allowing you to test the policy.
 
 ### Directives
 The most commonly used directives are listed, with a field for each. The placeholder values given are examples, not suggestions, but they may provide a useful starting point.
