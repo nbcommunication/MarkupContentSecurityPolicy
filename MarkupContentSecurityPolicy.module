@@ -42,7 +42,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 
 		return [
 			"title" => "Markup Content Security Policy",
-			"version" => 004,
+			"version" => 005,
 			"summary" => "Configure and implement a Content Security Policy for all front-end HTML pages.",
 			"author" => "chriswthomson",
 			"href" => "https://github.com/chriswthomson/MarkupContentSecurityPolicy",
@@ -239,7 +239,6 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 			$this->wire->addHookAfter("Page::render", function(HookEvent $event) {
 
 				$page = $event->object;
-				$config = $this->wire("config");
 				$contentType = $page->template->contentType;
 
 				// If not an html page with a <head> element, return
@@ -252,12 +251,15 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 					return;
 				}
 
+				$node = "</title>";
+				if(stripos($event->return, $node) === false) $node = "<head>";
+
 				// Place <meta> inside the <head>
 				$event->return = str_replace(
-					"<head>",
-					"<head>\n" .
+					$node,
+					"$node\n\n" .
 						"\t" . '<meta http-equiv="Content-Security-Policy" content="' . implode("; ", $this->directives) . '">' .
-						($this->report ? "\n\t" . '<script src="' . $config->urls($this) . 'report-uri.js"></script>' . "\n" : ""),
+						($this->report ? "\n\t" . '<script src="' . $this->wire("config")->urls($this) . 'report-uri.js"></script>' . "\n" : ""),
 					$event->return
 				);
 			});

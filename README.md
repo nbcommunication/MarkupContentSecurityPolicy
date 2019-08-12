@@ -15,7 +15,7 @@ Website Security Auditing Tools such as [Mozilla Observatory](https://observator
 
 A common way of adding the `Content-Security-Policy` header would be to add it to the .htaccess file in the site's root directory. However, this means the policy would also cover the ProcessWire admin, and this limits the level of security policy you can add.
 
-The solution is to use the `<meta>` element to configure a policy, for example: `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src https://*; child-src 'none';">`. **MarkupContentSecurityPolicy** places this element with your configured policy at the beginning of the `<head>` element on each HTML page of your site.
+The solution is to use the `<meta>` element to configure a policy, for example: `<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src https://*; child-src 'none';">`. **MarkupContentSecurityPolicy** places this element with your configured policy inside the `<head>` element on each HTML page of your site.
 
 There are some limitations to using the `<meta>` element:
 - The `frame-ancestors`, `report-uri`, and `sandbox` directives cannot be used.
