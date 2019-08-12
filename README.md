@@ -68,6 +68,18 @@ if(!empty($report)) {
 ### Debug Mode
 When this is enabled, a range of information is logged to **markup-content-security-policy**. This is probably most useful when debugging a reporting endpoint.
 
+## Add the meta tag manually
+Should you wish to place the meta tag manually in the `<head>` element, you can do so using `renderMeta()`: 
+
+```html
+<head>
+// meta tags
+<title>Example</title>
+// more tags
+<?= $modules->get("MarkupContentSecurityPolicy")->renderMeta() ?>
+</head>
+```
+
 ## Additional .htaccess Rules
 To get an A+ score on Mozilla Observatory, besides using HTTPS and enabling the HSTS header, you can also place the following prior to ProcessWire's htaccess directives:
 
