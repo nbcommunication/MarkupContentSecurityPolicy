@@ -239,31 +239,41 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 			$this->wire->addHookAfter("Page::render", function(HookEvent $event) {
 
 				$page = $event->object;
+				$html = $event->return;
 				$contentType = $page->template->contentType;
 
 				// If not an html page with a <head> element, return
 				if(
 					($contentType && $contentType !== "html") ||
-					stripos($event->return, "</html>") === false ||
-					stripos($event->return, "<head>") === false
+					stripos($html, "</html>") === false ||
+					stripos($html, "<head>") === false
 				) {
 					$this->logDebug(sprintf($this->_("%s is not an HTML page"), $page->url));
 					return;
 				}
 
+				// Do not append if already deployed
+				if(stripos(explode("</head>", $html)[0], "Content-Security-Policy") !== false) return;
+
 				$node = "</title>";
-				if(stripos($event->return, $node) === false) $node = "<head>";
+				if(stripos($html, $node) === false) $node = "<head>";
 
 				// Place <meta> inside the <head>
-				$event->return = str_replace(
-					$node,
-					"$node\n\n" .
-						"\t" . '<meta http-equiv="Content-Security-Policy" content="' . implode("; ", $this->directives) . '">' .
-						($this->report ? "\n\t" . '<script src="' . $this->wire("config")->urls($this) . 'report-uri.js"></script>' . "\n" : ""),
-					$event->return
-				);
+				$event->return = str_replace($node, "$node\n\n\t" . $this->renderMeta(true), $html);
 			});
 		}
+	}
+
+	/**
+	 * Render the meta
+	 *
+	 * @param bool $override
+	 * @return string
+	 *
+	 */
+	public function renderMeta($override = false) {
+		return ($this->deploy && !$this->debug) || $override ? '<meta http-equiv="Content-Security-Policy" content="' . implode("; ", $this->directives) . '">' .
+			($this->report ? "\n\t" . '<script src="' . $this->wire("config")->urls($this) . 'report-uri.js"></script>' . "\n" : "") : "";
 	}
 
 	/**
