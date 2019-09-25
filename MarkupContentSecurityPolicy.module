@@ -42,7 +42,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 
 		return [
 			"title" => "Markup Content Security Policy",
-			"version" => 005,
+			"version" => 006,
 			"summary" => "Configure and implement a Content Security Policy for all front-end HTML pages.",
 			"author" => "chriswthomson",
 			"href" => "https://github.com/chriswthomson/MarkupContentSecurityPolicy",
@@ -121,7 +121,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 		foreach(self::directives as $name) {
 			$key = $this->getDirectiveKey($name);
 			$value = $this->get($key);
-			if($value) $this->directives[] = "$name $value";
+			if($value) $this->directives[$name] = "$name $value";
 		}
 
 		// Append any custom directives
@@ -260,7 +260,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 
 				// Place <meta> inside the <head>
 				$event->return = str_replace($node, "$node\n\n\t" . $this->renderMeta(true), $html);
-			});
+			}, ["priority" => 200]);
 		}
 	}
 
@@ -287,6 +287,24 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	 */
 	public function getDirectiveKey($name) {
 		return $this->wire("sanitizer")->camelCase("directive-$name");
+	}
+
+	/**
+	 * Set a directive
+	 *
+	 * @param string $key The directive name e.g. script-src
+	 * @param string $value The value to set
+	 * @param bool $append Should the value be appended? 
+	 * If set to false, the directive will be overwritten (default=true).
+	 *
+	 */
+	public function setDirective($key, $value, $append = true) {
+		if(!array_key_exists($key, $this->directives) || !$append) {
+			$this->directives[$key] = $value;
+		} else {
+			$existing = str_replace("$key ", "", $this->directives[$key]);
+			if(stripos($existing, $value) === false) $this->directives[$key] = "$key $existing $value";
+		}
 	}
 
 	/**
