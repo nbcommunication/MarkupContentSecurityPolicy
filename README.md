@@ -56,10 +56,10 @@ The option to filter false positives should be used carefully, and only enabled 
 To retrieve the report at your endpoint, the following can be used:
 
 ```php
-$report = file_get_contents("php://input");
+$report = file_get_contents('php://input');
 if(!empty($report)) {
 	$report = json_decode($report, 1);
-	if(isset($report) && is_array($report) && isset($report["documentURI"])) {
+	if(isset($report) && is_array($report) && isset($report['documentURI'])) {
 		// Do something
 	}
 }
@@ -69,14 +69,14 @@ if(!empty($report)) {
 When this is enabled, a range of information is logged to **markup-content-security-policy**. This is probably most useful when debugging a reporting endpoint.
 
 ## Add the meta tag manually
-Should you wish to place the meta tag manually in the `<head>` element, you can do so using `renderMeta()`: 
+Should you wish to place the meta tag manually in the `<head>` element, you can do so using `renderMeta()`:
 
 ```html
 <head>
 // meta tags
 <title>Example</title>
 // more tags
-<?= $modules->get("MarkupContentSecurityPolicy")->renderMeta() ?>
+<?= $modules->get('MarkupContentSecurityPolicy')->renderMeta() ?>
 </head>
 ```
 
@@ -89,7 +89,7 @@ Header set Referrer-Policy "no-referrer-when-downgrade"
 ```
 
 ## Installation
-1. Download the [zip file](https://github.com/nbcommunication/MarkupContentSecurityPolicy/archive/master.zip) at Github or clone the repo into your `site/modules` directory.
+1. Download the [zip file](https://github.com/chriswthomson/MarkupContentSecurityPolicy/archive/master.zip) at Github or clone the repo into your `site/modules` directory.
 2. If you downloaded the zip file, extract it in your `sites/modules` directory.
 3. In your admin, go to Modules > Refresh, then Modules > New, then click on the Install button for this module.
 
