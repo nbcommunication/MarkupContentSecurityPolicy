@@ -5,7 +5,7 @@
  *
  * #pw-summary Configure and implement a Content Security Policy for all front-end HTML pages.
  *
- * @copyright 2019 NB Communication Ltd
+ * @copyright 2020 NB Communication Ltd
  * @license Mozilla Public License v2.0 http://mozilla.org/MPL/2.0/
  *
  * @property bool $deploy
@@ -43,7 +43,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 			'title' => 'Markup Content Security Policy',
 			'version' => 100,
 			'summary' => 'Configure and implement a Content Security Policy for all front-end HTML pages.',
-			'author' => 'chriswthomson',
+			'author' => 'nbcommunication',
 			'href' => 'https://github.com/nbcommunication/MarkupContentSecurityPolicy',
 			'singular' => true,
 			'autoload' => 'template!=admin',
