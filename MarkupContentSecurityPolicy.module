@@ -39,17 +39,16 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	 *
 	 */
 	public static function getModuleInfo() {
-
 		return [
-			"title" => "Markup Content Security Policy",
-			"version" => 006,
-			"summary" => "Configure and implement a Content Security Policy for all front-end HTML pages.",
-			"author" => "chriswthomson",
-			"href" => "https://github.com/chriswthomson/MarkupContentSecurityPolicy",
-			"singular" => true,
-			"autoload" => "template!=admin",
-			"icon" => "lock",
-			"requires" => "ProcessWire>=3.0.123",
+			'title' => 'Markup Content Security Policy',
+			'version' => 100,
+			'summary' => 'Configure and implement a Content Security Policy for all front-end HTML pages.',
+			'author' => 'chriswthomson',
+			'href' => 'https://github.com/nbcommunication/MarkupContentSecurityPolicy',
+			'singular' => true,
+			'autoload' => 'template!=admin',
+			'icon' => 'lock',
+			'requires' => 'ProcessWire>=3.0.123',
 		];
 	}
 
@@ -58,25 +57,25 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	 *
 	 */
 	const directives = [
-		"default-src",
-		"script-src",
-		"style-src",
-		"img-src",
-		"connect-src",
-		"font-src",
-		"object-src",
-		"media-src",
-		"manifest-src",
-		"frame-src",
-		"form-action",
-		"base-uri",
+		'default-src',
+		'script-src',
+		'style-src',
+		'img-src',
+		'connect-src',
+		'font-src',
+		'object-src',
+		'media-src',
+		'manifest-src',
+		'frame-src',
+		'form-action',
+		'base-uri',
 	];
 
 	/**
 	 * Report Name
 	 *
 	 */
-	const reportName = "csp-violations";
+	const reportName = 'csp-violations';
 
 	/**
 	 * The CSP Directives array
@@ -101,11 +100,11 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	 *
 	 */
 	public $reportFilters = [
-		"sourceFile" => [
-			"chrome://*",
-			"chrome-extension://*",
-			"safari-extension://*",
-			"blob:{httpHost}/*",
+		'sourceFile' => [
+			'chrome://*',
+			'chrome-extension://*',
+			'safari-extension://*',
+			'blob:{httpHost}/*',
 		],
 	];
 
@@ -115,7 +114,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	 */
 	public function init() {
 
-		$isAdmin = $this->wire("page")->template == "admin";
+		$isAdmin = $this->wire('page')->template == 'admin';
 
 		// Construct the array of directives
 		foreach(self::directives as $name) {
@@ -130,22 +129,22 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 		}
 
 		// Log directives in debug mode when accessing config
-		if($isAdmin) $this->logDebug($this->directives, $this->_("Directives"));
+		if($isAdmin) $this->logDebug($this->directives, $this->_('Directives'));
 
 		// Customise filters
 		foreach($this->reportFilters as $param => $filters) {
 			$this->enabledFilters[$param] = [];
-			$enabled = $this->get("reportFilters" . ucfirst($param));
+			$enabled = $this->get('reportFilters' . ucfirst($param));
 			if(!is_array($enabled)) $enabled = [];
 			foreach($filters as $key => $value) {
-				$value = str_replace("{httpHost}", $this->wire("input")->httpHostUrl(), $value);
+				$value = str_replace('{httpHost}', $this->wire('input')->httpHostUrl(), $value);
 				if(in_array($key, $enabled)) $this->enabledFilters[$param][] = $value;
 				$this->reportFilters[$param][$key] = $value;
 			}
 
 			if(count($this->enabledFilters[$param]) && $isAdmin) {
 				// Log enabled filters in debug mode when accessing config
-				$this->logDebug($this->enabledFilters[$param], sprintf($this->_("Enabled filters for %s"), "`" . $param . "`"));
+				$this->logDebug($this->enabledFilters[$param], sprintf($this->_('Enabled filters for %s'), '`' . $param . '`'));
 			}
 		}
 	}
@@ -157,15 +156,15 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	public function ready() {
 
 		// CSP violation reporting
-		if($this->wire("input")->get->bool(self::reportName)) {
+		if($this->wire('input')->get->bool(self::reportName)) {
 
-			$report = file_get_contents("php://input");
+			$report = file_get_contents('php://input');
 			if(!empty($report)) {
 
 				$report = json_decode($report, 1);
 
 				// If a valid report has been received
-				if(isset($report) && is_array($report) && isset($report["documentURI"])) {
+				if(isset($report['documentURI'])) {
 
 					// If filters specified, check and filter
 					$filtered = false;
@@ -173,11 +172,11 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 						foreach($filters as $filter) {
 							if(isset($report[$param])) {
 								$pattern = preg_quote($filter);
-								$pattern = str_replace("/", "\/", $pattern);
-								$pattern = str_replace("*", ".*", $pattern);
-								$filtered = (bool) preg_match("/" . $pattern . "/", $report[$param]);
+								$pattern = str_replace('/', '\/', $pattern);
+								$pattern = str_replace('*', '.*', $pattern);
+								$filtered = (bool) preg_match('/' . $pattern . '/', $report[$param]);
 								if($filtered) {
-									$this->logDebug($report, sprintf($this->_("Report filtered by %s"), "`" . $filter . "`"));
+									$this->logDebug($report, sprintf($this->_('Report filtered by %s'), '`' . $filter . '`'));
 									break;
 								}
 							}
@@ -188,9 +187,9 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 
 						// If exclusions are specified, remove them
 						if($this->reportExclude) {
-							foreach(explode(",", str_replace(" ", "", $this->reportExclude)) as $param) {
+							foreach(explode(',', str_replace(' ', '', $this->reportExclude)) as $param) {
 								if(isset($report[$param])) {
-									$this->logDebug($report[$param], sprintf($this->_("%s removed from report"), "`" . $param . "`"));
+									$this->logDebug($report[$param], sprintf($this->_('%s removed from report'), '`' . $param . '`'));
 									unset($report[$param]);
 								}
 							}
@@ -199,10 +198,10 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 						// JSON encode and remove newlines from report
 						// Remove newlines to preserve accurate log line count
 						// Use WireEncodeJSON as there is no need for empty values
-						$report = str_replace("\n", "", WireEncodeJSON($report));
+						$report = str_replace("\n", '', WireEncodeJSON($report));
 
 						// Log the report
-						$this->wire("log")->save(self::reportName, $report, ["url" => $this->wire("page")->url]);
+						$this->wire('log')->save(self::reportName, $report, ['url' => $this->wire('page')->url]);
 
 						// Post the report to an endpoint if specified
 						if($this->reportEndpoint) {
@@ -213,14 +212,14 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 								$response = $http->post($this->reportEndpoint, $report);
 								if($response === false) {
 									$this->logDebug($http->getError(), sprintf(
-										$this->_("Posting report to %s failed"),
+										$this->_('Posting report to %s failed'),
 										$this->reportEndpoint
 									));
 								} else {
-									$this->logDebug($response, sprintf($this->_("Endpoint Response %d"), $http->getHttpCode()));
+									$this->logDebug($response, sprintf($this->_('Endpoint Response %d'), $http->getHttpCode()));
 								}
 							} else {
-								$this->logDebug($this->reportEndpoint, $this->_("Endpoint failed URL validation"));
+								$this->logDebug($this->reportEndpoint, $this->_('Endpoint failed URL validation'));
 							}
 						}
 
@@ -233,10 +232,10 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 		}
 
 		// The Content Security Policy should only be used if deployed or the page is loaded by the superuser account
-		if(($this->deploy && !$this->debug) || $this->wire("user")->isSuperUser()) {
+		if(($this->deploy && !$this->debug) || $this->wire('user')->isSuperUser()) {
 
 			// Add the meta tag to HTML pages
-			$this->wire->addHookAfter("Page::render", function(HookEvent $event) {
+			$this->wire->addHookAfter('Page::render', function(HookEvent $event) {
 
 				$page = $event->object;
 				$html = $event->return;
@@ -244,23 +243,23 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 
 				// If not an html page with a <head> element, return
 				if(
-					($contentType && $contentType !== "html") ||
-					stripos($html, "</html>") === false ||
-					stripos($html, "<head>") === false
+					($contentType && $contentType !== 'html') ||
+					stripos($html, '</html>') === false ||
+					stripos($html, '<head>') === false
 				) {
-					$this->logDebug(sprintf($this->_("%s is not an HTML page"), $page->url));
+					$this->logDebug(sprintf($this->_('%s is not an HTML page'), $page->url));
 					return;
 				}
 
 				// Do not append if already deployed
-				if(stripos(explode("</head>", $html)[0], "Content-Security-Policy") !== false) return;
+				if(stripos(explode('</head>', $html)[0], 'Content-Security-Policy') !== false) return;
 
-				$node = "</title>";
-				if(stripos($html, $node) === false) $node = "<head>";
+				$node = '</title>';
+				if(stripos($html, $node) === false) $node = '<head>';
 
 				// Place <meta> inside the <head>
 				$event->return = str_replace($node, "$node\n\n\t" . $this->renderMeta(true), $html);
-			}, ["priority" => 200]);
+			}, ['priority' => 200]);
 		}
 	}
 
@@ -273,7 +272,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	 */
 	public function renderMeta($override = false) {
 		return ($this->deploy && !$this->debug) || $override ? '<meta http-equiv="Content-Security-Policy" content="' . implode("; ", $this->directives) . '">' .
-			($this->report ? "\n\t" . '<script src="' . $this->wire("config")->urls($this) . 'report-uri.js"></script>' . "\n" : "") : "";
+			($this->report ? "\n\t" . '<script src="' . $this->wire('config')->urls($this) . 'report-uri.js"></script>' . "\n" : '') : '';
 	}
 
 	/**
@@ -286,7 +285,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	 *
 	 */
 	public function getDirectiveKey($name) {
-		return $this->wire("sanitizer")->camelCase("directive-$name");
+		return $this->wire('sanitizer')->camelCase("directive-$name");
 	}
 
 	/**
@@ -294,15 +293,15 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	 *
 	 * @param string $key The directive name e.g. script-src
 	 * @param string $value The value to set
-	 * @param bool $append Should the value be appended? 
+	 * @param bool $append Should the value be appended?
 	 * If set to false, the directive will be overwritten (default=true).
 	 *
 	 */
 	public function setDirective($key, $value, $append = true) {
-		if(!array_key_exists($key, $this->directives) || !$append) {
+		if(!isset($this->directives[$key]) || !$append) {
 			$this->directives[$key] = $value;
 		} else {
-			$existing = str_replace("$key ", "", $this->directives[$key]);
+			$existing = str_replace("$key ", '', $this->directives[$key]);
 			if(stripos($existing, $value) === false) $this->directives[$key] = "$key $existing $value";
 		}
 	}
@@ -315,7 +314,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	 * @return bool
 	 *
 	 */
-	protected function logDebug($log, $title = "") {
-		return $this->debug ? $this->log(($title ? "$title: " : "") . (is_array($log) ? json_encode($log, 1) : $log)) : false;
+	protected function logDebug($log, $title = '') {
+		return $this->debug ? $this->log(($title ? "$title: " : '') . (is_array($log) ? json_encode($log, 1) : $log)) : false;
 	}
 }
