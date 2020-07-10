@@ -41,14 +41,14 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	public static function getModuleInfo() {
 		return [
 			'title' => 'Markup Content Security Policy',
-			'version' => 101,
+			'version' => 102,
 			'summary' => 'Configure and implement a Content Security Policy for all front-end HTML pages.',
 			'author' => 'nbcommunication',
 			'href' => 'https://github.com/nbcommunication/MarkupContentSecurityPolicy',
 			'singular' => true,
 			'autoload' => 'template!=admin',
 			'icon' => 'lock',
-			'requires' => 'ProcessWire>=3.0.123',
+			'requires' => 'ProcessWire>=3.0.123,PHP>=5.6',
 		];
 	}
 
