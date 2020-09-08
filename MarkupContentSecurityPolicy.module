@@ -41,7 +41,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	public static function getModuleInfo() {
 		return [
 			'title' => 'Markup Content Security Policy',
-			'version' => 102,
+			'version' => 103,
 			'summary' => 'Configure and implement a Content Security Policy for all front-end HTML pages.',
 			'author' => 'nbcommunication',
 			'href' => 'https://github.com/nbcommunication/MarkupContentSecurityPolicy',
@@ -295,6 +295,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	 * @param string $value The value to set
 	 * @param bool $append Should the value be appended?
 	 * If set to false, the directive will be overwritten (default=true).
+	 * @return string The amended directive
 	 *
 	 */
 	public function setDirective($key, $value, $append = true) {
@@ -304,6 +305,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 			$existing = str_replace("$key ", '', $this->directives[$key]);
 			if(stripos($existing, $value) === false) $this->directives[$key] = "$key $existing $value";
 		}
+		return str_replace("$key ", '', $this->directives[$key]);
 	}
 
 	/**
