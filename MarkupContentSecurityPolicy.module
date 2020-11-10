@@ -41,7 +41,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	public static function getModuleInfo() {
 		return [
 			'title' => 'Markup Content Security Policy',
-			'version' => 104,
+			'version' => 105,
 			'summary' => 'Configure and implement a Content Security Policy for all front-end HTML pages.',
 			'author' => 'nbcommunication',
 			'href' => 'https://github.com/nbcommunication/MarkupContentSecurityPolicy',
@@ -254,6 +254,14 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 
 				// Do not append if already deployed
 				if(strpos(explode('</head>', $html)[0], 'Content-Security-Policy') !== false) return;
+
+				// Append after the charset tag if available
+				if(strpos($html, '<meta charset=') !== false) {
+					preg_match('/<meta\scharset=[\'|"].*[\'|"]>/', $html, $matches);
+					if(count($matches)) {
+						$node = $matches[0];
+					}
+				}
 
 				// Place <meta> inside the <head>
 				$event->return = substr_replace($html, "$node\n\n\t" . $this->renderMeta(true), strpos($html, $node), strlen($node));
