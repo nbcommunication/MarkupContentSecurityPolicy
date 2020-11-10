@@ -41,7 +41,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	public static function getModuleInfo() {
 		return [
 			'title' => 'Markup Content Security Policy',
-			'version' => 106,
+			'version' => 107,
 			'summary' => 'Configure and implement a Content Security Policy for all front-end HTML pages.',
 			'author' => 'nbcommunication',
 			'href' => 'https://github.com/nbcommunication/MarkupContentSecurityPolicy',
@@ -240,13 +240,12 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 				$page = $event->object;
 				$html = $event->return;
 				$contentType = $page->template->contentType;
-				$node = '<head>';
 
 				// If not an html page with a <head> element, return
 				if(
 					($contentType && $contentType !== 'html') ||
 					strpos($html, '</html>') === false ||
-					strpos($html, $node) === false
+					strpos($html, '</head>') === false
 				) {
 					$this->logDebug(sprintf($this->_('%s is not an HTML page'), $page->url));
 					return;
@@ -255,15 +254,9 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 				// Do not append if already deployed
 				if(strpos(explode('</head>', $html)[0], 'Content-Security-Policy') !== false) return;
 
-				// Append after the meta charset tag if available
-				// NB: This charset tag must appear within the first 1024 bytes
-				if(strpos($html, '<meta charset=') !== false) {
-					preg_match('/<meta\scharset\S*?>/', $html, $matches);
-					if(count($matches)) $node = $matches[0];
-				}
-
-				// Place <meta> inside the <head>
-				$event->return = substr_replace($html, "$node\n\n\t" . $this->renderMeta(true), strpos($html, $node), strlen($node));
+				// Place <meta> inside the <head> before the <title>
+				$node = '<title>';
+				$event->return = substr_replace($html, $this->renderMeta(true) . "\n\n\t$node", strpos($html, $node), strlen($node));
 
 			}, ['priority' => 199]);
 		}
