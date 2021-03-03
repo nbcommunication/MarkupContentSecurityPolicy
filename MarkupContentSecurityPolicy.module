@@ -41,7 +41,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	public static function getModuleInfo() {
 		return [
 			'title' => 'Markup Content Security Policy',
-			'version' => 107,
+			'version' => 108,
 			'summary' => 'Configure and implement a Content Security Policy for all front-end HTML pages.',
 			'author' => 'nbcommunication',
 			'href' => 'https://github.com/nbcommunication/MarkupContentSecurityPolicy',
@@ -255,7 +255,11 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 				if(strpos(explode('</head>', $html)[0], 'Content-Security-Policy') !== false) return;
 
 				// Place <meta> inside the <head> before the <title>
-				$node = '<title>';
+				$node = '<title';
+				if(strpos($html, $node) === false) {
+					$this->logDebug(sprintf($this->_('Could not find %s in the <head>'), $node);
+					return;
+				}
 				$event->return = substr_replace($html, $this->renderMeta(true) . "\n\n\t$node", strpos($html, $node), strlen($node));
 
 			}, ['priority' => 199]);
