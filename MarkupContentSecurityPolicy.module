@@ -257,7 +257,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 				// Place <meta> inside the <head> before the <title>
 				$node = '<title';
 				if(strpos($html, $node) === false) {
-					$this->logDebug(sprintf($this->_('Could not find %s in the <head>'), $node);
+					$this->logDebug(sprintf($this->_('Could not find %s in the <head>'), $node));
 					return;
 				}
 				$event->return = substr_replace($html, $this->renderMeta(true) . "\n\n\t$node", strpos($html, $node), strlen($node));
