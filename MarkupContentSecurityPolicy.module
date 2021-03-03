@@ -5,7 +5,7 @@
  *
  * #pw-summary Configure and implement a Content Security Policy for all front-end HTML pages.
  *
- * @copyright 2020 NB Communication Ltd
+ * @copyright 2021 NB Communication Ltd
  * @license Mozilla Public License v2.0 http://mozilla.org/MPL/2.0/
  *
  * @property bool $deploy
