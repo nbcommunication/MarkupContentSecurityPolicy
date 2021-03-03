@@ -4,7 +4,7 @@
  * Send a report if the policy is violated. For more information on this event
  * please visit https://developer.mozilla.org/en-US/docs/Web/API/SecurityPolicyViolationEvent
  *
- * @copyright 2020 NB Communication Ltd
+ * @copyright 2021 NB Communication Ltd
  * @license Mozilla Public License v2.0 http://mozilla.org/MPL/2.0/
  *
  */
