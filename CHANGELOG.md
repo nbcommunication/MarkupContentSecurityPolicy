@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.2 (August 31, 2021)
+
+### Fixed
+- Delimiting of ids in storage
+
 ## 1.1.1 (August 31, 2021)
 
 ### Changed
