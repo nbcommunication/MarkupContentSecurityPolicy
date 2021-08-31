@@ -41,7 +41,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	public static function getModuleInfo() {
 		return [
 			'title' => 'Markup Content Security Policy',
-			'version' => 108,
+			'version' => 110,
 			'summary' => 'Configure and implement a Content Security Policy for all front-end HTML pages.',
 			'author' => 'nbcommunication',
 			'href' => 'https://github.com/nbcommunication/MarkupContentSecurityPolicy',
@@ -275,7 +275,7 @@ class MarkupContentSecurityPolicy extends WireData implements Module {
 	 */
 	public function renderMeta($override = false) {
 		return ($this->deploy && !$this->debug) || $override ? '<meta http-equiv="Content-Security-Policy" content="' . implode("; ", $this->directives) . '">' .
-			($this->report ? "\n\t" . '<script src="' . $this->wire('config')->urls($this) . 'report-uri.js"></script>' . "\n" : '') : '';
+			($this->report ? "\n\t" . '<script src="' . $this->wire('config')->urls($this) . 'report-uri.min.js"></script>' . "\n" : '') : '';
 	}
 
 	/**
