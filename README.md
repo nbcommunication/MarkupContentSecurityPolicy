@@ -1,9 +1,13 @@
 # Markup Content Security Policy
 Configure and implement a Content Security Policy for all front-end HTML pages.
 
-**This module should only be used in production once it has been fully tested in development. Deploying a Content Security Policy on a site without testing will almost certainly break something!**
+## Important Notice
+
+**This module is no longer being maintained. For more information please see https://processwire.com/talk/topic/21963-markupcontentsecuritypolicy/?do=findComment&comment=225122.**
 
 ## Overview
+
+**This module should only be used in production once it has been fully tested in development. Deploying a Content Security Policy on a site without testing will almost certainly break something!**
 
 > **Content Security Policy** (CSP) is an added layer of security that helps to detect and mitigate certain types of attacks, including Cross Site Scripting (XSS) and data injection attacks. These attacks are used for everything from data theft to site defacement to distribution of malware.
 >
